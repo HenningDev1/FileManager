@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\icon.ico</ApplicationIcon>
+    <RootNamespace>FileManager.Setup</RootNamespace>
+    <AssemblyName>FileManager-Setup</AssemblyName>
+    <Product>File Manager Setup</Product>
+    <!-- The published FileManager.exe that gets embedded into the installer (see build/build.ps1). -->
+    <PayloadPath Condition="'$(PayloadPath)' == ''">$(MSBuildThisFileDirectory)..\..\artifacts\publish\app\FileManager.exe</PayloadPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(PayloadPath)" LogicalName="payload.exe" Link="payload.exe" Condition="Exists('$(PayloadPath)')" />
+    <AvaloniaResource Include="..\..\assets\icon.png" Link="Assets\icon.png" />
+    <AvaloniaResource Include="..\..\assets\icon.ico" Link="Assets\icon.ico" />
+    <Compile Include="..\Shared\InstallCore.cs" Link="Shared\InstallCore.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+  </ItemGroup>
+</Project>

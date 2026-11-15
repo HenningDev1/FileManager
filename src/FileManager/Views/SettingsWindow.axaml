@@ -1,0 +1,77 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="FileManager.Views.SettingsWindow"
+        Title="Settings" Width="580" Height="680" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="48">
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Height="56" Background="Transparent" PointerPressed="Drag">
+      <TextBlock Text="Settings" Classes="header" Margin="24,8,0,0" VerticalAlignment="Center" />
+    </Border>
+    <Border DockPanel.Dock="Bottom" Padding="24,12,24,18" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock x:Name="VersionText" Classes="sub" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <Button Content="Reset to defaults" Click="Reset_Click" />
+          <Button Classes="accent" Content="Done" MinWidth="90" Click="Done_Click" HorizontalContentAlignment="Center" />
+        </StackPanel>
+      </Grid>
+    </Border>
+    <ScrollViewer>
+      <StackPanel Margin="24,0,24,16" Spacing="22">
+
+        <StackPanel Spacing="10">
+          <TextBlock Text="Theme" FontWeight="SemiBold" />
+          <WrapPanel x:Name="ThemeList" />
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+          <TextBlock Text="Accent color" FontWeight="SemiBold" />
+          <WrapPanel x:Name="AccentList" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="Custom" Classes="sub" VerticalAlignment="Center" />
+            <TextBox x:Name="AccentHex" Width="120" Watermark="#RRGGBB" TextChanged="AccentHex_Changed" />
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+          <TextBlock Text="Font" FontWeight="SemiBold" />
+          <ComboBox x:Name="FontBox" Width="300" SelectionChanged="Font_Changed" MaxDropDownHeight="360" />
+          <Grid ColumnDefinitions="110,*,50">
+            <TextBlock Text="Text size" Classes="sub" VerticalAlignment="Center" />
+            <Slider Grid.Column="1" x:Name="SizeSlider" Minimum="11" Maximum="18" TickFrequency="0.5" IsSnapToTickEnabled="True" ValueChanged="Size_Changed" />
+            <TextBlock Grid.Column="2" x:Name="SizeText" HorizontalAlignment="Right" VerticalAlignment="Center" />
+          </Grid>
+          <Grid ColumnDefinitions="110,*,50">
+            <TextBlock Text="Roundness" Classes="sub" VerticalAlignment="Center" />
+            <Slider Grid.Column="1" x:Name="RadiusSlider" Minimum="0" Maximum="20" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Radius_Changed" />
+            <TextBlock Grid.Column="2" x:Name="RadiusText" HorizontalAlignment="Right" VerticalAlignment="Center" />
+          </Grid>
+          <Border Classes="card" Padding="14,10">
+            <StackPanel Spacing="2">
+              <TextBlock Text="The quick brown fox jumps over the lazy dog" />
+              <TextBlock Text="Preview of your font settings · 0123456789" Classes="sub" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+          <TextBlock Text="Browsing" FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel>
+              <TextBlock Text="Show hidden and system files" />
+              <TextBlock Text="Files like desktop.ini and AppData folders" Classes="sub" />
+            </StackPanel>
+            <ToggleSwitch Grid.Column="1" x:Name="HiddenSwitch" OnContent="" OffContent="" IsCheckedChanged="Hidden_Changed" />
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Text="Keyboard shortcuts" FontWeight="SemiBold" />
+          <TextBlock Classes="sub" TextWrapping="Wrap"
+                     Text="Ctrl+F filter · Ctrl+Shift+F search · F6 dual pane · Tab switch pane · Ctrl+P preview · Ctrl+L type path · F2 rename · Ctrl+R batch rename · Del recycle · Shift+Del delete · Ctrl+Shift+N new folder · Ctrl+Shift+C copy path · Alt+←/→ back/forward · Backspace up" />
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</Window>

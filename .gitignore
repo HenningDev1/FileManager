@@ -1,0 +1,16 @@
+# Build output (see src/Directory.Build.props)
+artifacts/
+
+# Release packages (attached to GitHub Releases instead)
+release/
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+Thumbs.db
+.DS_Store
+bin/
+obj/

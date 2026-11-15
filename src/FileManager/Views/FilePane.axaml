@@ -1,0 +1,103 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:m="using:FileManager.Models"
+             xmlns:c="using:FileManager.Controls"
+             x:Class="FileManager.Views.FilePane">
+  <Border x:Name="Card" Classes="card" Margin="0,0,0,8">
+    <DockPanel>
+      <!-- Breadcrumb / path bar -->
+      <Border DockPanel.Dock="Top" Padding="8,6" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderBrush}">
+        <Grid ColumnDefinitions="*,Auto">
+          <Panel>
+            <Border x:Name="CrumbArea" Background="Transparent" DoubleTapped="Crumbs_DoubleTapped" ToolTip.Tip="Double-click to type a path (Ctrl+L)">
+              <ScrollViewer x:Name="CrumbScroll" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="Crumbs" Orientation="Horizontal" VerticalAlignment="Center" />
+              </ScrollViewer>
+            </Border>
+            <TextBox x:Name="PathBox" IsVisible="False" MinHeight="28" Padding="8,3"
+                     KeyDown="PathBox_KeyDown" LostFocus="PathBox_LostFocus" />
+          </Panel>
+          <TextBlock Grid.Column="1" x:Name="CountText" Classes="sub" VerticalAlignment="Center" Margin="10,0,4,0" />
+        </Grid>
+      </Border>
+
+      <!-- Column headers (list mode) -->
+      <Grid x:Name="Header" DockPanel.Dock="Top" ColumnDefinitions="*,150,140,86" Margin="12,4,18,0">
+        <Button Classes="hdr" x:Name="HdrName" Content="Name" Tag="Name" Click="Sort_Click" />
+        <Button Classes="hdr" Grid.Column="1" x:Name="HdrDate" Content="Date Modified" Tag="Date" Click="Sort_Click" />
+        <Button Classes="hdr" Grid.Column="2" x:Name="HdrType" Content="Kind" Tag="Type" Click="Sort_Click" />
+        <Button Classes="hdr" Grid.Column="3" x:Name="HdrSize" Content="Size" Tag="Size" Click="Sort_Click" HorizontalContentAlignment="Right" />
+      </Grid>
+
+      <Panel x:Name="ListArea" DragDrop.AllowDrop="True">
+        <Panel.ContextMenu>
+          <ContextMenu x:Name="ItemMenu">
+            <MenuItem Header="Open" Tag="open" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="external" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Open in other pane" Tag="openother" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="dual" /></MenuItem.Icon></MenuItem>
+            <Separator />
+            <MenuItem Header="Cut" Tag="cut" InputGesture="Ctrl+X" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="cut" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Copy" Tag="copy" InputGesture="Ctrl+C" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="copy" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Paste" Tag="paste" InputGesture="Ctrl+V" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="paste" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Copy to other pane" Tag="copyother" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="copy" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Move to other pane" Tag="moveother" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="move" /></MenuItem.Icon></MenuItem>
+            <Separator />
+            <MenuItem Header="Rename" Tag="rename" InputGesture="F2" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="rename" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Batch rename…" Tag="batchrename" InputGesture="Ctrl+R" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="batch" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Move to Recycle Bin" Tag="delete" InputGesture="Delete" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="trash" /></MenuItem.Icon></MenuItem>
+            <Separator />
+            <MenuItem Header="Compress to ZIP" Tag="zip" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="zip" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Extract here" Tag="extract" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="zip" /></MenuItem.Icon></MenuItem>
+            <Separator />
+            <MenuItem Header="New folder" Tag="newfolder" InputGesture="Ctrl+Shift+N" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="folderplus" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="New text file" Tag="newfile" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="file" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Copy path" Tag="copypath" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="doc" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Show in Windows Explorer" Tag="explorer" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="folder" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Open terminal here" Tag="terminal" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="terminal" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Properties" Tag="properties" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="info" /></MenuItem.Icon></MenuItem>
+          </ContextMenu>
+        </Panel.ContextMenu>
+
+        <ListBox x:Name="ListView" SelectionMode="Multiple" Padding="4,2,4,8"
+                 DoubleTapped="List_DoubleTapped">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="m:FileItem">
+              <Grid ColumnDefinitions="*,150,140,86" Background="Transparent" MinHeight="24">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Image Source="{Binding Icon}" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center"
+                         RenderOptions.BitmapInterpolationMode="HighQuality" />
+                  <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </Grid>
+                <TextBlock Grid.Column="1" Text="{Binding ModifiedText}" Classes="sub" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding TypeName}" Classes="sub" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="3" Text="{Binding SizeText}" Classes="sub" VerticalAlignment="Center" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ListBox x:Name="IconView" SelectionMode="Multiple" Padding="8" IsVisible="False"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 DoubleTapped="List_DoubleTapped">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="m:FileItem">
+              <StackPanel Width="108" Spacing="6" Margin="0,6" Background="Transparent">
+                <Image Source="{Binding Display}" Width="72" Height="72" HorizontalAlignment="Center"
+                       RenderOptions.BitmapInterpolationMode="HighQuality" />
+                <TextBlock Text="{Binding Name}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2"
+                           TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel x:Name="EmptyState" IsVisible="False" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" IsHitTestVisible="False">
+          <c:Ico Kind="folder" Width="44" Height="44" Opacity="0.3" HorizontalAlignment="Center" StrokeWidth="1.2" />
+          <TextBlock x:Name="EmptyText" Classes="sub" HorizontalAlignment="Center" Text="This folder is empty" />
+        </StackPanel>
+      </Panel>
+    </DockPanel>
+  </Border>
+</UserControl>

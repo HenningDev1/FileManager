@@ -1,0 +1,141 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:m="using:FileManager.Models"
+             xmlns:c="using:FileManager.Controls"
+             x:Class="FileManager.Views.DashboardView">
+  <Grid RowDefinitions="Auto,*" Margin="0,0,0,8">
+    <!-- Drives -->
+    <Border Classes="card" Padding="20,16">
+      <StackPanel Spacing="12">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="2">
+            <TextBlock Text="Storage" Classes="title" />
+            <TextBlock Text="See what fills up your drives. Pick a drive or folder to scan." Classes="sub" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Button Click="ScanFolder_Click">
+              <StackPanel Orientation="Horizontal" Spacing="6"><c:Ico Kind="folder" /><TextBlock Text="Scan folder…" /></StackPanel>
+            </Button>
+            <Button x:Name="StopButton" Content="Stop" IsVisible="False" Click="Stop_Click" />
+          </StackPanel>
+        </Grid>
+        <ItemsControl x:Name="DriveList">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="m:DriveCard">
+              <Button Width="250" Margin="0,0,10,6" Padding="14,10" Tag="{Binding Root}" Click="Drive_Click"
+                      HorizontalContentAlignment="Stretch">
+                <StackPanel Spacing="6">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <c:Ico Kind="drive" Width="20" Height="20" Margin="0,0,10,0" Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  </Grid>
+                  <ProgressBar Value="{Binding UsedPercent}" Maximum="100" Height="6" />
+                  <TextBlock Text="{Binding FreeText}" Classes="sub" />
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock x:Name="StatusText" Classes="sub" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <ProgressBar Grid.Column="1" x:Name="Busy" IsIndeterminate="True" Width="140" Height="4" IsVisible="False" />
+        </Grid>
+      </StackPanel>
+    </Border>
+
+    <!-- Results -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,10,380" Margin="0,10,0,0">
+      <Border Classes="card" Padding="8">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,90,140,64" Margin="36,4,20,6">
+            <TextBlock Text="Folder" Classes="sub" FontWeight="Medium" />
+            <TextBlock Grid.Column="1" Text="Size" Classes="sub" FontWeight="Medium" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="2" Text="Share of parent" Classes="sub" FontWeight="Medium" Margin="12,0,0,0" />
+            <TextBlock Grid.Column="3" Text="%" Classes="sub" FontWeight="Medium" HorizontalAlignment="Right" />
+          </Grid>
+          <Panel>
+            <TreeView x:Name="Tree" DoubleTapped="Tree_DoubleTapped">
+              <TreeView.Styles>
+                <Style Selector="TreeViewItem" x:DataType="m:DirNode">
+                  <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                </Style>
+              </TreeView.Styles>
+              <TreeView.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Open in File Manager" Tag="open" Click="TreeMenu_Click"><MenuItem.Icon><c:Ico Kind="folder" /></MenuItem.Icon></MenuItem>
+                  <MenuItem Header="Show in Windows Explorer" Tag="explorer" Click="TreeMenu_Click"><MenuItem.Icon><c:Ico Kind="external" /></MenuItem.Icon></MenuItem>
+                  <MenuItem Header="Scan this folder" Tag="scan" Click="TreeMenu_Click"><MenuItem.Icon><c:Ico Kind="chart" /></MenuItem.Icon></MenuItem>
+                  <MenuItem Header="Find duplicates here" Tag="dups" Click="TreeMenu_Click"><MenuItem.Icon><c:Ico Kind="dup" /></MenuItem.Icon></MenuItem>
+                </ContextMenu>
+              </TreeView.ContextMenu>
+              <TreeView.ItemTemplate>
+                <TreeDataTemplate x:DataType="m:DirNode" ItemsSource="{Binding Children}">
+                  <Grid ColumnDefinitions="*,90,140,64" Background="Transparent" ToolTip.Tip="{Binding Info}">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <c:Ico Kind="{Binding IconKind}" Margin="0,0,8,0" Foreground="{DynamicResource AccentBrush}" />
+                      <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    </Grid>
+                    <TextBlock Grid.Column="1" Text="{Binding SizeText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Medium" />
+                    <ProgressBar Grid.Column="2" Value="{Binding Percent}" Maximum="100" Height="6" Margin="12,0,0,0" VerticalAlignment="Center" MinWidth="0" />
+                    <TextBlock Grid.Column="3" Text="{Binding PercentText}" Classes="sub" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                  </Grid>
+                </TreeDataTemplate>
+              </TreeView.ItemTemplate>
+            </TreeView>
+            <StackPanel x:Name="TreeEmpty" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" IsHitTestVisible="False">
+              <c:Ico Kind="chart" Width="44" Height="44" Opacity="0.3" HorizontalAlignment="Center" StrokeWidth="1.2" />
+              <TextBlock Text="Choose a drive above to see which folders take up the most space" Classes="sub" />
+            </StackPanel>
+          </Panel>
+        </DockPanel>
+      </Border>
+
+      <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
+
+      <Grid Grid.Column="2" RowDefinitions="*,10,*">
+        <Border Classes="card" Padding="12,10">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Largest files" Classes="header" Margin="4,0,0,6" />
+            <ListBox x:Name="TopList" DoubleTapped="TopList_DoubleTapped">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="m:FileItem">
+                  <Grid ColumnDefinitions="Auto,*,Auto" Background="Transparent" ToolTip.Tip="{Binding FullPath}">
+                    <Image Source="{Binding Icon}" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="0">
+                      <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding Folder}" Classes="sub" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{Binding SizeText}" FontWeight="Medium" VerticalAlignment="Center" Margin="8,0,0,0" />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Border>
+        <Border Grid.Row="2" Classes="card" Padding="12,10">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="By file type" Classes="header" Margin="4,0,0,6" />
+            <ListBox x:Name="TypeList" Classes="plain">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="m:TypeStat">
+                  <StackPanel Spacing="3">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="{Binding Ext}" FontWeight="Medium" />
+                      <TextBlock Grid.Column="1" Classes="sub">
+                        <Run Text="{Binding SizeText}" /><Run Text="  ·  " /><Run Text="{Binding CountText}" />
+                      </TextBlock>
+                    </Grid>
+                    <ProgressBar Value="{Binding Percent}" Maximum="100" Height="5" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Border>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FileManager.Setup/FileManager.Setup.csproj" />
+    <Project Path="src/FileManager/FileManager.csproj" />
+  </Folder>
+</Solution>

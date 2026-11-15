@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:FileManager.Controls"
+             x:Class="FileManager.Views.PreviewPanel">
+  <Border Classes="card" Margin="0,0,0,8">
+    <Panel>
+      <StackPanel x:Name="EmptyState" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20">
+        <c:Ico Kind="preview" Width="44" Height="44" Opacity="0.3" HorizontalAlignment="Center" StrokeWidth="1.2" />
+        <TextBlock x:Name="EmptyText" Text="Select a file to preview" Classes="sub" TextAlignment="Center" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <ScrollViewer x:Name="Scroll" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="14" Spacing="12">
+          <Border x:Name="ImageHost" CornerRadius="10" Background="{DynamicResource ControlBrush}" MinHeight="150" ClipToBounds="True">
+            <Panel>
+              <Image x:Name="PreviewImage" Stretch="Uniform" MaxHeight="440" RenderOptions.BitmapInterpolationMode="HighQuality" />
+              <Border x:Name="Badge" IsVisible="False" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="8"
+                      CornerRadius="6" Padding="6,2" Background="#99000000">
+                <TextBlock x:Name="BadgeText" Foreground="White" FontSize="{DynamicResource AppFontSizeSmall}" FontWeight="SemiBold" />
+              </Border>
+            </Panel>
+          </Border>
+
+          <Grid x:Name="PdfBar" ColumnDefinitions="Auto,*,Auto" IsVisible="False">
+            <Button Classes="tb" Click="PdfPrev_Click" ToolTip.Tip="Previous page"><c:Ico Kind="back" /></Button>
+            <TextBlock Grid.Column="1" x:Name="PageText" Classes="sub" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Button Grid.Column="2" Classes="tb" Click="PdfNext_Click" ToolTip.Tip="Next page"><c:Ico Kind="forward" /></Button>
+          </Grid>
+
+          <StackPanel x:Name="VideoBar" IsVisible="False" Spacing="4">
+            <Slider x:Name="Scrub" Minimum="0" Maximum="1000" ValueChanged="Scrub_ValueChanged" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock x:Name="TimeText" Classes="sub" />
+              <TextBlock Grid.Column="1" Text="Drag to scrub through the video" Classes="sub" />
+            </Grid>
+            <UniformGrid x:Name="Frames" Rows="1" Margin="0,6,0,0" />
+          </StackPanel>
+
+          <StackPanel Spacing="2">
+            <TextBlock x:Name="NameText" Classes="header" TextWrapping="Wrap" />
+            <TextBlock x:Name="KindText" Classes="sub" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <WrapPanel x:Name="Actions" Orientation="Horizontal">
+            <Button x:Name="OpenBtn" Classes="accent" Click="Open_Click" Margin="0,0,8,6">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <c:Ico x:Name="OpenIco" Kind="external" />
+                <TextBlock x:Name="OpenText" Text="Open" />
+              </StackPanel>
+            </Button>
+            <Button x:Name="ExtraBtn" IsVisible="False" Click="Extra_Click" Margin="0,0,8,6" />
+          </WrapPanel>
+
+          <StackPanel x:Name="PropsPanel" Spacing="7" />
+
+          <Border x:Name="TextHost" IsVisible="False" CornerRadius="8" Background="{DynamicResource ControlBrush}" Padding="10">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520">
+              <SelectableTextBlock x:Name="TextPreview" FontFamily="Cascadia Mono, Consolas, Courier New" FontSize="11.5" />
+            </ScrollViewer>
+          </Border>
+
+          <StackPanel x:Name="ListHost" IsVisible="False" Spacing="3" />
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </Border>
+</UserControl>

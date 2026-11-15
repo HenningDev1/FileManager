@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:m="using:FileManager.Models"
+             xmlns:c="using:FileManager.Controls"
+             x:Class="FileManager.Views.SearchView">
+  <Border Classes="card" Margin="0,0,0,8">
+    <DockPanel Margin="20,18,20,8">
+      <StackPanel DockPanel.Dock="Top" Spacing="12">
+        <StackPanel Spacing="2">
+          <TextBlock Text="Search" Classes="title" />
+          <TextBlock Text="Type part of a name, several words, or wildcards like *.pdf or report_??.docx" Classes="sub" />
+        </StackPanel>
+        <Grid ColumnDefinitions="*,Auto,Auto">
+          <TextBox x:Name="QueryBox" Watermark="What are you looking for?" KeyDown="Query_KeyDown">
+            <TextBox.InnerLeftContent><c:Ico Kind="search" Margin="10,0,0,0" Opacity="0.55" /></TextBox.InnerLeftContent>
+          </TextBox>
+          <Button Grid.Column="1" x:Name="RootButton" Margin="8,0,0,0" Click="Root_Click" MaxWidth="280">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <c:Ico Kind="folder" />
+              <TextBlock x:Name="RootText" TextTrimming="CharacterEllipsis" MaxWidth="230" />
+            </StackPanel>
+          </Button>
+          <Button Grid.Column="2" x:Name="GoButton" Classes="accent" Content="Search" Margin="8,0,0,0" MinWidth="90" Click="Go_Click" HorizontalContentAlignment="Center" />
+        </Grid>
+        <WrapPanel Orientation="Horizontal">
+          <ComboBox x:Name="KindBox" SelectedIndex="0" Margin="0,0,8,6" MinWidth="130">
+            <ComboBoxItem>Files &amp; folders</ComboBoxItem>
+            <ComboBoxItem>Files only</ComboBoxItem>
+            <ComboBoxItem>Folders only</ComboBoxItem>
+          </ComboBox>
+          <ComboBox x:Name="TypeBox" SelectedIndex="0" Margin="0,0,8,6" MinWidth="130">
+            <ComboBoxItem>Any type</ComboBoxItem>
+            <ComboBoxItem>Documents</ComboBoxItem>
+            <ComboBoxItem>Images</ComboBoxItem>
+            <ComboBoxItem>Videos</ComboBoxItem>
+            <ComboBoxItem>Audio</ComboBoxItem>
+            <ComboBoxItem>Archives</ComboBoxItem>
+            <ComboBoxItem>Code</ComboBoxItem>
+          </ComboBox>
+          <ComboBox x:Name="SizeBox" SelectedIndex="0" Margin="0,0,8,6" MinWidth="120">
+            <ComboBoxItem>Any size</ComboBoxItem>
+            <ComboBoxItem>Larger than 1 MB</ComboBoxItem>
+            <ComboBoxItem>Larger than 100 MB</ComboBoxItem>
+            <ComboBoxItem>Larger than 1 GB</ComboBoxItem>
+          </ComboBox>
+          <CheckBox x:Name="AllDrivesBox" Content="Search all drives" Margin="4,0,12,6" />
+          <CheckBox x:Name="HiddenBox" Content="Include hidden" Margin="0,0,0,6" />
+        </WrapPanel>
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock x:Name="StatusText" Classes="sub" VerticalAlignment="Center" />
+          <ProgressBar Grid.Column="1" x:Name="Busy" IsIndeterminate="True" Width="120" Height="4" IsVisible="False" />
+        </Grid>
+      </StackPanel>
+
+      <ListBox x:Name="Results" Margin="-8,8,-8,0" SelectionMode="Multiple" DoubleTapped="Results_DoubleTapped">
+        <ListBox.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Open" Tag="open" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="external" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Show in folder" Tag="reveal" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="folder" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Show in Windows Explorer" Tag="explorer" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="external" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="Copy path" Tag="copypath" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="doc" /></MenuItem.Icon></MenuItem>
+            <Separator />
+            <MenuItem Header="Move to Recycle Bin" Tag="delete" Click="Menu_Click"><MenuItem.Icon><c:Ico Kind="trash" /></MenuItem.Icon></MenuItem>
+          </ContextMenu>
+        </ListBox.ContextMenu>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="m:FileItem">
+            <Grid ColumnDefinitions="Auto,*,90,150" Background="Transparent">
+              <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,10,0" VerticalAlignment="Center" />
+              <StackPanel Grid.Column="1" Spacing="1">
+                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding Folder}" Classes="sub" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+              <TextBlock Grid.Column="2" Text="{Binding SizeText}" Classes="sub" HorizontalAlignment="Right" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="3" Text="{Binding ModifiedText}" Classes="sub" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+  </Border>
+</UserControl>

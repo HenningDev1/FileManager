@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="FileManager.Setup.SetupWindow"
+        Title="File Manager Setup" Width="680" Height="440" CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="36">
+  <Grid ColumnDefinitions="230,*">
+    <!-- Brand panel -->
+    <Border PointerPressed="Drag">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#64D2FF" Offset="0" />
+          <GradientStop Color="#0A6CF0" Offset="1" />
+        </LinearGradientBrush>
+      </Border.Background>
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12">
+        <Image Source="avares://FileManager-Setup/Assets/icon.png" Width="104" Height="104" RenderOptions.BitmapInterpolationMode="HighQuality" />
+        <TextBlock Text="File Manager" Foreground="White" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
+        <TextBlock x:Name="VersionText" Foreground="#E6FFFFFF" HorizontalAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+    <Panel Grid.Column="1" Margin="30,46,30,24">
+      <!-- Fresh install -->
+      <DockPanel x:Name="InstallPanel">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <Button Content="Cancel" Click="Cancel_Click" />
+          <Button Classes="accent" Content="Install" Click="Install_Click" />
+        </StackPanel>
+        <StackPanel Spacing="14">
+          <TextBlock Text="Install File Manager" Classes="h1" />
+          <TextBlock Classes="sub" TextWrapping="Wrap"
+                     Text="A clean, fast file manager with dual panes, file previews, quick search, a duplicate finder and a storage dashboard. No admin rights needed." />
+          <StackPanel Spacing="6">
+            <TextBlock Text="Install location" FontWeight="Medium" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="DirBox" />
+              <Button Grid.Column="1" Content="Browse…" Margin="8,0,0,0" Click="Browse_Click" />
+            </Grid>
+          </StackPanel>
+          <CheckBox x:Name="DesktopBox" Content="Create a desktop shortcut" IsChecked="True" />
+          <CheckBox x:Name="StartBox" Content="Add to the Start menu" IsChecked="True" />
+          <CheckBox x:Name="LaunchBox" Content="Open File Manager when done" IsChecked="True" />
+        </StackPanel>
+      </DockPanel>
+
+      <!-- Already installed -->
+      <DockPanel x:Name="ManagePanel" IsVisible="False">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <Button Content="Cancel" Click="Cancel_Click" />
+          <Button Classes="danger" Content="Uninstall" Click="Uninstall_Click" />
+          <Button Classes="accent" x:Name="ReinstallButton" Content="Reinstall" Click="Reinstall_Click" />
+        </StackPanel>
+        <StackPanel Spacing="14">
+          <TextBlock Text="File Manager is already installed" Classes="h1" TextWrapping="Wrap" />
+          <TextBlock x:Name="ManageText" Classes="sub" TextWrapping="Wrap" />
+          <TextBlock Classes="sub" TextWrapping="Wrap"
+                     Text="Reinstall / update replaces the program files and keeps your settings. Uninstall removes the app, its shortcuts and its entry in Windows Settings. Your own files are never touched." />
+          <CheckBox x:Name="RemoveSettingsBox" Content="When uninstalling, also remove my settings" />
+        </StackPanel>
+      </DockPanel>
+
+      <!-- Progress -->
+      <StackPanel x:Name="ProgressPanel" IsVisible="False" VerticalAlignment="Center" Spacing="14">
+        <TextBlock x:Name="ProgressTitle" Classes="h1" />
+        <ProgressBar x:Name="Bar" Minimum="0" Maximum="1" />
+        <TextBlock x:Name="ProgressText" Classes="sub" />
+      </StackPanel>
+
+      <!-- Done -->
+      <DockPanel x:Name="DonePanel" IsVisible="False">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <Button Content="Close" Click="Cancel_Click" />
+          <Button Classes="accent" x:Name="LaunchButton" Content="Open File Manager" Click="Launch_Click" />
+        </StackPanel>
+        <StackPanel Spacing="14" VerticalAlignment="Center">
+          <TextBlock x:Name="DoneTitle" Classes="h1" TextWrapping="Wrap" />
+          <TextBlock x:Name="DoneText" Classes="sub" TextWrapping="Wrap" />
+        </StackPanel>
+      </DockPanel>
+    </Panel>
+  </Grid>
+</Window>

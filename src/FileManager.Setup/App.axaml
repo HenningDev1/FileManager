@@ -1,0 +1,86 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="FileManager.Setup.App"
+             RequestedThemeVariant="Default">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="BgBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="ControlBrush" Color="#EDEDF0" />
+          <SolidColorBrush x:Key="HoverBrush" Color="#E2E2E6" />
+          <SolidColorBrush x:Key="TextBrush" Color="#1D1D1F" />
+          <SolidColorBrush x:Key="SubTextBrush" Color="#6E6E73" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="BgBrush" Color="#232325" />
+          <SolidColorBrush x:Key="ControlBrush" Color="#3A3A3D" />
+          <SolidColorBrush x:Key="HoverBrush" Color="#46464A" />
+          <SolidColorBrush x:Key="TextBrush" Color="#F5F5F7" />
+          <SolidColorBrush x:Key="SubTextBrush" Color="#A1A1A6" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+      <Color x:Key="SystemAccentColor">#007AFF</Color>
+      <SolidColorBrush x:Key="AccentBrush" Color="#007AFF" />
+    </ResourceDictionary>
+  </Application.Resources>
+  <Application.Styles>
+    <FluentTheme />
+    <Style Selector="Window">
+      <Setter Property="FontFamily" Value="fonts:Inter#Inter" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Background" Value="{DynamicResource BgBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.sub">
+      <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Button">
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="16,7" />
+      <Setter Property="MinWidth" Value="90" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    </Style>
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    </Style>
+    <Style Selector="Button.accent">
+      <Setter Property="Background" Value="#007AFF" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#2A8CFF" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.danger">
+      <Setter Property="Background" Value="#FF3B30" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FF5A50" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="CheckBox /template/ Border#NormalRectangle">
+      <Setter Property="CornerRadius" Value="5" />
+    </Style>
+    <Style Selector="ProgressBar">
+      <Setter Property="Foreground" Value="#007AFF" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Height" Value="8" />
+    </Style>
+  </Application.Styles>
+</Application>
