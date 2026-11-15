@@ -46,6 +46,13 @@ public static class DuplicateFinder
         return ((stem + ext).ToLowerInvariant(), found);
     }
 
+    // Every Steam library (on any drive) keeps its games in "<library>\steamapps\...".
+    // Games ship many identical asset files on purpose, so they are always skipped.
+    static bool IsSteamFolder(ReadOnlySpan<char> name) => name.Equals("steamapps", StringComparison.OrdinalIgnoreCase);
+
+    static bool IsSteamPath(ReadOnlySpan<char> dir) =>
+        dir.Contains(@"\steamapps\", StringComparison.OrdinalIgnoreCase) || dir.EndsWith(@"\steamapps", StringComparison.OrdinalIgnoreCase);
+
     readonly record struct F(string Path, long Size, DateTime Modified);
 
     public static Task<List<DupGroup>> FindAsync(IReadOnlyList<string> roots, long minSize, bool includeNameMatches,
@@ -62,8 +69,10 @@ public static class DuplicateFinder
         {
             var en = new FileSystemEnumerable<F>(root, (ref FileSystemEntry e) => new F(e.ToFullPath(), e.Length, e.LastWriteTimeUtc.LocalDateTime), opts)
             {
-                ShouldIncludePredicate = (ref FileSystemEntry e) => !e.IsDirectory && e.Length >= Math.Max(1, minSize) && (e.Attributes & Shell.CloudMask) == 0,
-                ShouldRecursePredicate = (ref FileSystemEntry e) => (e.Attributes & FileAttributes.ReparsePoint) == 0 || !Shell.IsLink(e.ToFullPath()),
+                ShouldIncludePredicate = (ref FileSystemEntry e) => !e.IsDirectory && e.Length >= Math.Max(1, minSize) && (e.Attributes & Shell.CloudMask) == 0
+                    && !IsSteamPath(e.Directory),
+                ShouldRecursePredicate = (ref FileSystemEntry e) => !IsSteamFolder(e.FileName)
+                    && ((e.Attributes & FileAttributes.ReparsePoint) == 0 || !Shell.IsLink(e.ToFullPath())),
             };
             foreach (var f in en)
             {

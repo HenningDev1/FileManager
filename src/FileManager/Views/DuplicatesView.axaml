@@ -9,7 +9,7 @@
         <StackPanel Spacing="2">
           <TextBlock Text="Duplicate Finder" Classes="title" />
           <TextBlock TextWrapping="Wrap" Classes="sub"
-                     Text="Finds files with identical content — including copies named like photo_1.jpg, photo (2).jpg or photo - Copy.jpg. Nothing is ever deleted automatically." />
+                     Text="Finds files with identical content — including copies named like photo_1.jpg, photo (2).jpg or photo - Copy.jpg. Nothing is ever deleted automatically. Steam games are always skipped." />
         </StackPanel>
         <WrapPanel Orientation="Horizontal">
           <Button x:Name="RootButton" Click="Root_Click" Margin="0,0,8,6" MaxWidth="320">
