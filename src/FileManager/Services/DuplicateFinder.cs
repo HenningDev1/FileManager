@@ -48,10 +48,50 @@ public static class DuplicateFinder
 
     // Every Steam library (on any drive) keeps its games in "<library>\steamapps\...".
     // Games ship many identical asset files on purpose, so they are always skipped.
-    static bool IsSteamFolder(ReadOnlySpan<char> name) => name.Equals("steamapps", StringComparison.OrdinalIgnoreCase);
+    // Epic Games installs into "...\Epic Games\<game>" by default; custom locations are listed in the launcher's manifests.
+    static readonly string[] GameFolderNames = ["steamapps", "Epic Games"];
 
-    static bool IsSteamPath(ReadOnlySpan<char> dir) =>
-        dir.Contains(@"\steamapps\", StringComparison.OrdinalIgnoreCase) || dir.EndsWith(@"\steamapps", StringComparison.OrdinalIgnoreCase);
+    static bool IsGameFolder(ReadOnlySpan<char> name)
+    {
+        foreach (var n in GameFolderNames)
+            if (name.Equals(n, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
+    }
+
+    static bool IsGamePath(ReadOnlySpan<char> dir, List<string> epicDirs)
+    {
+        foreach (var n in GameFolderNames)
+            if (dir.Contains($"\\{n}\\", StringComparison.OrdinalIgnoreCase) || dir.EndsWith($"\\{n}", StringComparison.OrdinalIgnoreCase))
+                return true;
+        foreach (var e in epicDirs)
+            if (dir.StartsWith(e, StringComparison.OrdinalIgnoreCase) && (dir.Length == e.Length || dir[e.Length] == '\\'))
+                return true;
+        return false;
+    }
+
+    /// <summary>Install folders of all Epic Games titles, read from the Epic launcher's .item manifests.</summary>
+    static List<string> EpicInstallDirs()
+    {
+        var list = new List<string>();
+        try
+        {
+            var manifests = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests");
+            if (!Directory.Exists(manifests)) return list;
+            foreach (var f in Directory.EnumerateFiles(manifests, "*.item"))
+            {
+                try
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(f));
+                    if (doc.RootElement.TryGetProperty("InstallLocation", out var loc) && loc.GetString() is { Length: > 3 } p)
+                        list.Add(Path.TrimEndingDirectorySeparator(Path.GetFullPath(p)));
+                }
+                catch { }
+            }
+        }
+        catch { }
+        return list;
+    }
 
     readonly record struct F(string Path, long Size, DateTime Modified);
 
@@ -60,6 +100,7 @@ public static class DuplicateFinder
     {
         // 1) Collect files
         var files = new List<F>();
+        var epicDirs = EpicInstallDirs();
         var opts = new EnumerationOptions
         {
             RecurseSubdirectories = true, IgnoreInaccessible = true,
@@ -70,8 +111,8 @@ public static class DuplicateFinder
             var en = new FileSystemEnumerable<F>(root, (ref FileSystemEntry e) => new F(e.ToFullPath(), e.Length, e.LastWriteTimeUtc.LocalDateTime), opts)
             {
                 ShouldIncludePredicate = (ref FileSystemEntry e) => !e.IsDirectory && e.Length >= Math.Max(1, minSize) && (e.Attributes & Shell.CloudMask) == 0
-                    && !IsSteamPath(e.Directory),
-                ShouldRecursePredicate = (ref FileSystemEntry e) => !IsSteamFolder(e.FileName)
+                    && !IsGamePath(e.Directory, epicDirs),
+                ShouldRecursePredicate = (ref FileSystemEntry e) => !IsGameFolder(e.FileName) && !IsGamePath(e.ToFullPath(), epicDirs)
                     && ((e.Attributes & FileAttributes.ReparsePoint) == 0 || !Shell.IsLink(e.ToFullPath())),
             };
             foreach (var f in en)
