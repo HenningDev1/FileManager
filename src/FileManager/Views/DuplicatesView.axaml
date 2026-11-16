@@ -9,7 +9,7 @@
         <StackPanel Spacing="2">
           <TextBlock Text="Duplicate Finder" Classes="title" />
           <TextBlock TextWrapping="Wrap" Classes="sub"
-                     Text="Finds files with identical content — including copies named like photo_1.jpg, photo (2).jpg or photo - Copy.jpg. Nothing is ever deleted automatically. Steam and Epic Games games are always skipped." />
+                     Text="Finds files with identical content — including copies named like photo_1.jpg, photo (2).jpg or photo - Copy.jpg. Nothing is ever deleted automatically. Steam and Epic Games games are always skipped; program and developer folders are skipped unless you include them." />
         </StackPanel>
         <WrapPanel Orientation="Horizontal">
           <Button x:Name="RootButton" Click="Root_Click" Margin="0,0,8,6" MaxWidth="320">
@@ -27,6 +27,8 @@
           </ComboBox>
           <CheckBox x:Name="NameMatchBox" Content="Also show _1 / (2) / Copy names with different content" Margin="4,0,12,6" />
           <CheckBox x:Name="HiddenBox" Content="Include hidden" Margin="0,0,12,6" />
+          <CheckBox x:Name="SoftwareBox" Content="Include program &amp; developer folders" Margin="0,0,12,6"
+                    ToolTip.Tip="Off by default: skips Program Files, Windows, AppData, bin/obj build output, node_modules, .nuget, .git and program files like .dll — they contain copies on purpose." />
           <Button x:Name="ScanButton" Classes="accent" Content="Scan" MinWidth="90" Click="Scan_Click" Margin="0,0,0,6" HorizontalContentAlignment="Center" />
         </WrapPanel>
         <Grid ColumnDefinitions="*,Auto">

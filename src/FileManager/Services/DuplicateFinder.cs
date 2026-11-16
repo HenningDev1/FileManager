@@ -58,6 +58,28 @@ public static class DuplicateFinder
         return false;
     }
 
+    // Program, system and developer folders are full of intentional copies (runtimes, build output,
+    // package caches). They are skipped unless the user explicitly opts in.
+    static readonly HashSet<string> SoftwareDirs = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Program Files", "Program Files (x86)", "Windows", "ProgramData", "AppData", "$Recycle.Bin", "System Volume Information",
+        "bin", "obj", "artifacts", "publish", "node_modules", "packages", ".nuget", ".dotnet", ".git", ".svn", ".hg", ".vs",
+        ".idea", ".vscode", ".gradle", ".m2", ".cargo", ".rustup", "__pycache__", "venv", ".venv", "site-packages",
+        "dist-packages", ".cache", ".npm", ".yarn", "bower_components", "vendor",
+    };
+
+    static readonly HashSet<string> SoftwareExts = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".dll", ".pdb", ".sys", ".lib", ".obj", ".o", ".a", ".so", ".dylib", ".pyc", ".pyd", ".mui", ".winmd",
+        ".cat", ".nupkg", ".class", ".jar",
+    };
+
+    static bool IsSoftwareFile(ReadOnlySpan<char> name)
+    {
+        var ext = Path.GetExtension(name);
+        return ext.Length > 0 && SoftwareExts.Contains(ext.ToString());
+    }
+
     static bool IsGamePath(ReadOnlySpan<char> dir, List<string> epicDirs)
     {
         foreach (var n in GameFolderNames)
@@ -96,7 +118,7 @@ public static class DuplicateFinder
     readonly record struct F(string Path, long Size, DateTime Modified);
 
     public static Task<List<DupGroup>> FindAsync(IReadOnlyList<string> roots, long minSize, bool includeNameMatches,
-        bool includeHidden, Action<string> progress, CancellationToken ct) => Task.Run(() =>
+        bool includeHidden, bool includeSoftware, Action<string> progress, CancellationToken ct) => Task.Run(() =>
     {
         // 1) Collect files
         var files = new List<F>();
@@ -111,8 +133,9 @@ public static class DuplicateFinder
             var en = new FileSystemEnumerable<F>(root, (ref FileSystemEntry e) => new F(e.ToFullPath(), e.Length, e.LastWriteTimeUtc.LocalDateTime), opts)
             {
                 ShouldIncludePredicate = (ref FileSystemEntry e) => !e.IsDirectory && e.Length >= Math.Max(1, minSize) && (e.Attributes & Shell.CloudMask) == 0
-                    && !IsGamePath(e.Directory, epicDirs),
+                    && !IsGamePath(e.Directory, epicDirs) && (includeSoftware || !IsSoftwareFile(e.FileName)),
                 ShouldRecursePredicate = (ref FileSystemEntry e) => !IsGameFolder(e.FileName) && !IsGamePath(e.ToFullPath(), epicDirs)
+                    && (includeSoftware || !SoftwareDirs.Contains(e.FileName.ToString()))
                     && ((e.Attributes & FileAttributes.ReparsePoint) == 0 || !Shell.IsLink(e.ToFullPath())),
             };
             foreach (var f in en)

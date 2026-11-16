@@ -67,7 +67,7 @@ public partial class DuplicatesView : UserControl
         var started = DateTime.Now;
         try
         {
-            _groups = await DuplicateFinder.FindAsync([_root], min, NameMatchBox.IsChecked == true, HiddenBox.IsChecked == true,
+            _groups = await DuplicateFinder.FindAsync([_root], min, NameMatchBox.IsChecked == true, HiddenBox.IsChecked == true, SoftwareBox.IsChecked == true,
                 msg => Dispatcher.UIThread.Post(() => { if (_cts == cts) StatusText.Text = msg; }), cts.Token);
             Populate();
             StatusText.Text = $"Finished in {(DateTime.Now - started).TotalSeconds:0.0} s · {_root}";
