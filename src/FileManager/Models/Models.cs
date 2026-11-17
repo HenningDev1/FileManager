@@ -32,6 +32,7 @@ public sealed class FileItem : Observable
 
     public string SizeText => IsDrive ? Detail ?? "" : IsDirectory ? "" : Fmt.Size(Size);
     public string ModifiedText => IsDrive || Modified == default ? "" : Fmt.Date(Modified);
+    public string ModifiedShort => IsDrive || Modified == default ? "" : Modified.ToString("d");
     public string Folder => Path.GetDirectoryName(FullPath) ?? "";
 
     Bitmap? _icon, _thumb;

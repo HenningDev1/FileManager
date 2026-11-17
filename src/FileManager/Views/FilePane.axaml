@@ -3,15 +3,35 @@
              xmlns:m="using:FileManager.Models"
              xmlns:c="using:FileManager.Controls"
              x:Class="FileManager.Views.FilePane">
+  <!-- Column widths are set per pane in code (AdaptColumns): they shrink to fit and can be dragged. -->
+  <UserControl.Resources>
+    <x:Double x:Key="ColDateW">150</x:Double>
+    <x:Double x:Key="ColKindW">140</x:Double>
+    <x:Double x:Key="ColSizeW">86</x:Double>
+    <x:Boolean x:Key="ColDateOn">True</x:Boolean>
+    <x:Boolean x:Key="ColKindOn">True</x:Boolean>
+    <x:Boolean x:Key="ColSizeOn">True</x:Boolean>
+    <x:Boolean x:Key="DateLong">True</x:Boolean>
+    <x:Boolean x:Key="DateShort">False</x:Boolean>
+  </UserControl.Resources>
   <UserControl.Styles>
-    <!-- Column widths; columns disappear when the pane gets narrow so the name always has room. -->
-    <Style Selector=":is(Control).colDate"><Setter Property="Width" Value="150" /></Style>
-    <Style Selector=":is(Control).colKind"><Setter Property="Width" Value="140" /></Style>
-    <Style Selector=":is(Control).colSize"><Setter Property="Width" Value="86" /></Style>
-    <Style Selector="Border.compact :is(Control).colDate"><Setter Property="Width" Value="122" /></Style>
-    <Style Selector="Border.noKind :is(Control).colKind"><Setter Property="IsVisible" Value="False" /></Style>
-    <Style Selector="Border.noDate :is(Control).colDate"><Setter Property="IsVisible" Value="False" /></Style>
-    <Style Selector="Border.noSize :is(Control).colSize"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="Border.grip">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Margin" Value="-4,2,0,2" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="SizeWestEast" />
+      <Setter Property="ToolTip.Tip" Value="Drag to resize · double-click to reset" />
+    </Style>
+    <Style Selector="Border.grip > Border">
+      <Setter Property="Width" Value="1" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
+    </Style>
+    <Style Selector="Border.grip:pointerover > Border">
+      <Setter Property="Width" Value="2" />
+      <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    </Style>
   </UserControl.Styles>
   <Border x:Name="Card" Classes="card" Margin="0,0,0,8">
     <DockPanel>
@@ -39,9 +59,18 @@
       <!-- Column headers (list mode) -->
       <Grid x:Name="Header" DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto,Auto" Margin="12,4,18,0">
         <Button Classes="hdr" x:Name="HdrName" Content="Name" Tag="Name" Click="Sort_Click" />
-        <Button Classes="hdr colDate" Grid.Column="1" x:Name="HdrDate" Content="Date Modified" Tag="Date" Click="Sort_Click" />
-        <Button Classes="hdr colKind" Grid.Column="2" x:Name="HdrType" Content="Kind" Tag="Type" Click="Sort_Click" />
-        <Button Classes="hdr colSize" Grid.Column="3" x:Name="HdrSize" Content="Size" Tag="Size" Click="Sort_Click" HorizontalContentAlignment="Right" />
+        <Panel Grid.Column="1" Width="{DynamicResource ColDateW}" IsVisible="{DynamicResource ColDateOn}">
+          <Button Classes="hdr" x:Name="HdrDate" Content="Date Modified" Tag="Date" Click="Sort_Click" Margin="4,0,0,0" />
+          <Border Classes="grip" Tag="0" PointerPressed="Grip_Pressed" PointerMoved="Grip_Moved" PointerReleased="Grip_Released" DoubleTapped="Grip_Reset"><Border /></Border>
+        </Panel>
+        <Panel Grid.Column="2" Width="{DynamicResource ColKindW}" IsVisible="{DynamicResource ColKindOn}">
+          <Button Classes="hdr" x:Name="HdrType" Content="Kind" Tag="Type" Click="Sort_Click" Margin="4,0,0,0" />
+          <Border Classes="grip" Tag="1" PointerPressed="Grip_Pressed" PointerMoved="Grip_Moved" PointerReleased="Grip_Released" DoubleTapped="Grip_Reset"><Border /></Border>
+        </Panel>
+        <Panel Grid.Column="3" Width="{DynamicResource ColSizeW}" IsVisible="{DynamicResource ColSizeOn}">
+          <Button Classes="hdr" x:Name="HdrSize" Content="Size" Tag="Size" Click="Sort_Click" HorizontalContentAlignment="Right" Margin="4,0,0,0" />
+          <Border Classes="grip" Tag="2" PointerPressed="Grip_Pressed" PointerMoved="Grip_Moved" PointerReleased="Grip_Released" DoubleTapped="Grip_Reset"><Border /></Border>
+        </Panel>
       </Grid>
 
       <Panel x:Name="ListArea" DragDrop.AllowDrop="True">
@@ -82,9 +111,12 @@
                          RenderOptions.BitmapInterpolationMode="HighQuality" />
                   <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                 </Grid>
-                <TextBlock Grid.Column="1" Text="{Binding ModifiedText}" Classes="sub colDate" VerticalAlignment="Center" Padding="8,0,0,0" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" Text="{Binding TypeName}" Classes="sub colKind" VerticalAlignment="Center" Padding="8,0,0,0" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="3" Text="{Binding SizeText}" Classes="sub colSize" VerticalAlignment="Center" TextAlignment="Right" TextTrimming="CharacterEllipsis" />
+                <Panel Grid.Column="1" Width="{DynamicResource ColDateW}" IsVisible="{DynamicResource ColDateOn}">
+                  <TextBlock Text="{Binding ModifiedText}" IsVisible="{DynamicResource DateLong}" Classes="sub" VerticalAlignment="Center" Padding="8,0,0,0" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="{Binding ModifiedShort}" IsVisible="{DynamicResource DateShort}" Classes="sub" VerticalAlignment="Center" Padding="8,0,0,0" TextTrimming="CharacterEllipsis" />
+                </Panel>
+                <TextBlock Grid.Column="2" Text="{Binding TypeName}" Width="{DynamicResource ColKindW}" IsVisible="{DynamicResource ColKindOn}" Classes="sub" VerticalAlignment="Center" Padding="8,0,0,0" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="3" Text="{Binding SizeText}" Width="{DynamicResource ColSizeW}" IsVisible="{DynamicResource ColSizeOn}" Classes="sub" VerticalAlignment="Center" TextAlignment="Right" TextTrimming="CharacterEllipsis" />
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>

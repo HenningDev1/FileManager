@@ -268,6 +268,11 @@
     <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
     <Setter Property="CornerRadius" Value="3" />
     <Setter Property="MinHeight" Value="4" />
+    <!-- Fluent gives horizontal progress bars a 200px minimum, which overflowed the narrow sidebar. -->
+    <Setter Property="MinWidth" Value="0" />
+  </Style>
+  <Style Selector="ProgressBar:horizontal">
+    <Setter Property="MinWidth" Value="0" />
   </Style>
 
   <!-- ===== Lists ===== -->

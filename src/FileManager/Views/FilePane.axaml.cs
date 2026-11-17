@@ -54,6 +54,7 @@ public partial class FilePane : UserControl
             lb.AddHandler(PointerReleasedEvent, (_, _) => { _pressPoint = null; }, RoutingStrategies.Tunnel, true);
         }
         SizeChanged += (_, e) => AdaptColumns(e.NewSize.Width);
+        ColumnsChanged += () => AdaptColumns(_lastWidth);
         // Keep the current folder (last breadcrumb) visible whenever the bar or its content resizes.
         Crumbs.SizeChanged += (_, _) => CrumbScroll.Offset = new Vector(double.MaxValue, 0);
         CrumbScroll.SizeChanged += (_, _) => CrumbScroll.Offset = new Vector(double.MaxValue, 0);
@@ -71,14 +72,97 @@ public partial class FilePane : UserControl
     /// <summary>Shows back/forward/up buttons inside the pane (used in dual-pane mode).</summary>
     public bool ShowNav { set => PaneNav.IsVisible = value; }
 
-    /// <summary>Drops less important columns as the pane narrows so file names stay readable.</summary>
+    static event Action? ColumnsChanged;
+    static readonly double[] DefaultCols = [150, 140, 86];
+    static readonly string[] ColKeys = ["ColDate", "ColKind", "ColSize"];
+    double _lastWidth;
+    readonly double[] _colW = [150, 140, 86];
+    int _dragCol = -1;
+    double _dragStartX;
+    double[] _dragStartW = [];
+
+    /// <summary>
+    /// Fits Date / Kind / Size next to the name: they keep the user's widths when there's room and shrink
+    /// proportionally when there isn't. A column is only dropped if the pane is truly tiny.
+    /// </summary>
     void AdaptColumns(double width)
     {
-        Card.Classes.Set("compact", width < 820);
-        Card.Classes.Set("noKind", width < 700);
-        Card.Classes.Set("noDate", width < 500);
-        Card.Classes.Set("noSize", width < 330);
+        if (width <= 0) return;
+        _lastWidth = width;
+        var s = Settings.Current;
+        double[] want = [s.ColDate, s.ColKind, s.ColSize];
+        double content = width - 44;                       // list padding, icon gap, scrollbar
+        double nameMin = Math.Max(90, content * 0.34);
+        double avail = Math.Max(0, content - nameMin);
+        bool[] on = [true, true, true];
+        int[] dropOrder = [1, 0, 2];                         // Kind first, then Date, then Size
+        for (int drop = 0; ; drop++)
+        {
+            double sum = 0;
+            for (int i = 0; i < 3; i++) if (on[i]) sum += want[i];
+            double f = sum <= avail || sum == 0 ? 1 : avail / sum;
+            bool fits = true;
+            for (int i = 0; i < 3; i++)
+            {
+                _colW[i] = on[i] ? Math.Floor(want[i] * f) : 0;
+                if (on[i] && _colW[i] < 40) fits = false;
+            }
+            if (fits || drop == 3) break;
+            on[dropOrder[drop]] = false;
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            Resources[ColKeys[i] + "W"] = Math.Max(_colW[i], 1);
+            Resources[ColKeys[i] + "On"] = on[i] && _colW[i] >= 40;
+        }
+        bool longDate = _colW[0] >= 128;
+        Resources["DateLong"] = longDate;
+        Resources["DateShort"] = !longDate;
         CountText.IsVisible = width >= 460;
+        UpdateHeaders();
+    }
+
+    void Grip_Pressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Border { Tag: string tag } b || !e.GetCurrentPoint(b).Properties.IsLeftButtonPressed) return;
+        _dragCol = int.Parse(tag);
+        _dragStartX = e.GetPosition(this).X;
+        _dragStartW = (double[])_colW.Clone();
+        e.Pointer.Capture(b);
+        e.Handled = true;
+    }
+
+    void Grip_Moved(object? sender, PointerEventArgs e)
+    {
+        if (_dragCol < 0) return;
+        double dx = e.GetPosition(this).X - _dragStartX;
+        var w = (double[])_dragStartW.Clone();
+        // Dragging a column's left edge to the left makes that column wider (and the name narrower).
+        w[_dragCol] = Math.Clamp(_dragStartW[_dragCol] - dx, 40, 500);
+        var s = Settings.Current;
+        if (w[0] > 0) s.ColDate = w[0];
+        if (w[1] > 0) s.ColKind = w[1];
+        if (w[2] > 0) s.ColSize = w[2];
+        AdaptColumns(_lastWidth);
+        e.Handled = true;
+    }
+
+    void Grip_Released(object? sender, PointerReleasedEventArgs e)
+    {
+        if (_dragCol < 0) return;
+        _dragCol = -1;
+        e.Pointer.Capture(null);
+        Settings.Save();
+        ColumnsChanged?.Invoke();
+    }
+
+    void Grip_Reset(object? sender, TappedEventArgs e)
+    {
+        var s = Settings.Current;
+        (s.ColDate, s.ColKind, s.ColSize) = (DefaultCols[0], DefaultCols[1], DefaultCols[2]);
+        Settings.Save();
+        ColumnsChanged?.Invoke();
+        e.Handled = true;
     }
 
     void UpdatePaneNav()
@@ -264,7 +348,7 @@ public partial class FilePane : UserControl
     {
         string Arrow(string k) => _sortKey == k ? (_asc ? "  ↑" : "  ↓") : "";
         HdrName.Content = "Name" + Arrow("Name");
-        HdrDate.Content = "Date Modified" + Arrow("Date");
+        HdrDate.Content = (_colW[0] < 110 ? "Date" : "Date Modified") + Arrow("Date");
         HdrType.Content = "Kind" + Arrow("Type");
         HdrSize.Content = "Size" + Arrow("Size");
     }

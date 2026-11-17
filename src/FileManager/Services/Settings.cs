@@ -12,6 +12,10 @@ public sealed class AppSettings
     /// <summary>Interface scale; 0 = automatic (shrinks a little on small screens).</summary>
     public double UiScale { get; set; }
     public bool ShowHidden { get; set; }
+    /// <summary>Preferred list column widths (Date, Kind, Size); they shrink proportionally in narrow panes.</summary>
+    public double ColDate { get; set; } = 150;
+    public double ColKind { get; set; } = 140;
+    public double ColSize { get; set; } = 86;
     public bool DualPane { get; set; }
     public bool ShowPreview { get; set; } = true;
     public bool GridView { get; set; }
