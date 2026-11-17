@@ -99,14 +99,40 @@ public partial class MainWindow : Window
             BeginMoveDrag(e);
     }
 
-    void AdaptToolbar(double width)
+    double _scale = 1;
+
+    /// <summary>
+    /// Dynamic scaling: picks an interface scale (automatic for small/low-resolution screens, or the
+    /// user's choice) and adapts sidebar, preview and toolbar to the space that's actually available.
+    /// </summary>
+    void AdaptToolbar(double windowWidth)
     {
+        if (windowWidth <= 0) return;
+        var setting = Settings.Current.UiScale;
+        double scale = setting > 0 ? setting : windowWidth < 1000 ? 0.85 : windowWidth < 1200 ? 0.9 : 1.0;
+        if (Math.Abs(scale - _scale) > 0.001 || ScaleHost.LayoutTransform is null)
+        {
+            _scale = scale;
+            ScaleHost.LayoutTransform = new ScaleTransform(scale, scale);
+        }
+        double width = windowWidth / _scale;   // width in scaled layout units
+
+        // Keep clear of the Windows caption buttons, which are not scaled.
+        ToolbarGrid.Margin = new Thickness(12, 12, 146 / _scale, 6);
+
+        bool narrow = width < 1350;
+        RootGrid.ColumnDefinitions[0].Width = new GridLength(width < 1100 ? 180 : narrow ? 200 : 236);
+        if (_preview)
+            BrowserGrid.ColumnDefinitions[4].Width = new GridLength(width < 1100 ? 230 : narrow ? 260 : 300);
+
         bool browser = _tool is null;
-        ActionGroup.IsVisible = browser && width >= 1280;
+        ActionGroup.IsVisible = browser && width >= (_dual ? 1400 : 1280);
         ViewGroup.IsVisible = browser;
         NavGroup.IsVisible = browser;
-        SearchBox.Width = width < 1050 ? 170 : 240;
+        SearchBox.Width = width < 1100 ? 160 : 240;
     }
+
+    public void ApplyScale() => AdaptToolbar(Bounds.Width);
 
     // ================= Sidebar =================
 
@@ -280,6 +306,9 @@ public partial class MainWindow : Window
         BrowserGrid.ColumnDefinitions[0].Width = new GridLength(1, GridUnitType.Star);
         Split1.IsVisible = on;
         Pane2.IsVisible = on;
+        Pane1.ShowNav = on;
+        Pane2.ShowNav = on;
+        AdaptToolbar(Bounds.Width);
         if (!on && _active == Pane2) SetActive(Pane1);
         else SetActive(_active);
     }
@@ -293,6 +322,7 @@ public partial class MainWindow : Window
         BrowserGrid.ColumnDefinitions[4].Width = new GridLength(on ? 300 : 0);
         Split2.IsVisible = on;
         Preview.IsVisible = on;
+        AdaptToolbar(Bounds.Width);
         if (on) Preview.Show(_active.SelectedItems);
     }
 

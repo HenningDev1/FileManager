@@ -9,6 +9,8 @@ public sealed class AppSettings
     public string Font { get; set; } = "Inter";
     public double FontSize { get; set; } = 13;
     public double Radius { get; set; } = 12;
+    /// <summary>Interface scale; 0 = automatic (shrinks a little on small screens).</summary>
+    public double UiScale { get; set; }
     public bool ShowHidden { get; set; }
     public bool DualPane { get; set; }
     public bool ShowPreview { get; set; } = true;

@@ -42,6 +42,17 @@
             <Slider Grid.Column="1" x:Name="SizeSlider" Minimum="11" Maximum="18" TickFrequency="0.5" IsSnapToTickEnabled="True" ValueChanged="Size_Changed" />
             <TextBlock Grid.Column="2" x:Name="SizeText" HorizontalAlignment="Right" VerticalAlignment="Center" />
           </Grid>
+          <Grid ColumnDefinitions="110,*">
+            <TextBlock Text="Interface size" Classes="sub" VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1" x:Name="ScaleBox" Width="200" SelectionChanged="Scale_Changed">
+              <ComboBoxItem>Automatic</ComboBoxItem>
+              <ComboBoxItem>80 %</ComboBoxItem>
+              <ComboBoxItem>90 %</ComboBoxItem>
+              <ComboBoxItem>100 %</ComboBoxItem>
+              <ComboBoxItem>110 %</ComboBoxItem>
+              <ComboBoxItem>125 %</ComboBoxItem>
+            </ComboBox>
+          </Grid>
           <Grid ColumnDefinitions="110,*,50">
             <TextBlock Text="Roundness" Classes="sub" VerticalAlignment="Center" />
             <Slider Grid.Column="1" x:Name="RadiusSlider" Minimum="0" Maximum="20" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Radius_Changed" />

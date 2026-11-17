@@ -3,12 +3,27 @@
              xmlns:m="using:FileManager.Models"
              xmlns:c="using:FileManager.Controls"
              x:Class="FileManager.Views.FilePane">
+  <UserControl.Styles>
+    <!-- Column widths; columns disappear when the pane gets narrow so the name always has room. -->
+    <Style Selector=":is(Control).colDate"><Setter Property="Width" Value="150" /></Style>
+    <Style Selector=":is(Control).colKind"><Setter Property="Width" Value="140" /></Style>
+    <Style Selector=":is(Control).colSize"><Setter Property="Width" Value="86" /></Style>
+    <Style Selector="Border.compact :is(Control).colDate"><Setter Property="Width" Value="122" /></Style>
+    <Style Selector="Border.noKind :is(Control).colKind"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="Border.noDate :is(Control).colDate"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="Border.noSize :is(Control).colSize"><Setter Property="IsVisible" Value="False" /></Style>
+  </UserControl.Styles>
   <Border x:Name="Card" Classes="card" Margin="0,0,0,8">
     <DockPanel>
       <!-- Breadcrumb / path bar -->
       <Border DockPanel.Dock="Top" Padding="8,6" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderBrush}">
-        <Grid ColumnDefinitions="*,Auto">
-          <Panel>
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <StackPanel x:Name="PaneNav" Orientation="Horizontal" Spacing="0" Margin="0,0,6,0" IsVisible="False">
+            <Button Classes="tb" x:Name="PaneBack" ToolTip.Tip="Back" Click="PaneBack_Click" MinWidth="28" MinHeight="28" Padding="5"><c:Ico Kind="back" /></Button>
+            <Button Classes="tb" x:Name="PaneFwd" ToolTip.Tip="Forward" Click="PaneFwd_Click" MinWidth="28" MinHeight="28" Padding="5"><c:Ico Kind="forward" /></Button>
+            <Button Classes="tb" x:Name="PaneUp" ToolTip.Tip="Up" Click="PaneUp_Click" MinWidth="28" MinHeight="28" Padding="5"><c:Ico Kind="up" /></Button>
+          </StackPanel>
+          <Panel Grid.Column="1">
             <Border x:Name="CrumbArea" Background="Transparent" DoubleTapped="Crumbs_DoubleTapped" ToolTip.Tip="Double-click to type a path (Ctrl+L)">
               <ScrollViewer x:Name="CrumbScroll" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
                 <StackPanel x:Name="Crumbs" Orientation="Horizontal" VerticalAlignment="Center" />
@@ -17,16 +32,16 @@
             <TextBox x:Name="PathBox" IsVisible="False" MinHeight="28" Padding="8,3"
                      KeyDown="PathBox_KeyDown" LostFocus="PathBox_LostFocus" />
           </Panel>
-          <TextBlock Grid.Column="1" x:Name="CountText" Classes="sub" VerticalAlignment="Center" Margin="10,0,4,0" />
+          <TextBlock Grid.Column="2" x:Name="CountText" Classes="sub" VerticalAlignment="Center" Margin="10,0,4,0" />
         </Grid>
       </Border>
 
       <!-- Column headers (list mode) -->
-      <Grid x:Name="Header" DockPanel.Dock="Top" ColumnDefinitions="*,150,140,86" Margin="12,4,18,0">
+      <Grid x:Name="Header" DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto,Auto" Margin="12,4,18,0">
         <Button Classes="hdr" x:Name="HdrName" Content="Name" Tag="Name" Click="Sort_Click" />
-        <Button Classes="hdr" Grid.Column="1" x:Name="HdrDate" Content="Date Modified" Tag="Date" Click="Sort_Click" />
-        <Button Classes="hdr" Grid.Column="2" x:Name="HdrType" Content="Kind" Tag="Type" Click="Sort_Click" />
-        <Button Classes="hdr" Grid.Column="3" x:Name="HdrSize" Content="Size" Tag="Size" Click="Sort_Click" HorizontalContentAlignment="Right" />
+        <Button Classes="hdr colDate" Grid.Column="1" x:Name="HdrDate" Content="Date Modified" Tag="Date" Click="Sort_Click" />
+        <Button Classes="hdr colKind" Grid.Column="2" x:Name="HdrType" Content="Kind" Tag="Type" Click="Sort_Click" />
+        <Button Classes="hdr colSize" Grid.Column="3" x:Name="HdrSize" Content="Size" Tag="Size" Click="Sort_Click" HorizontalContentAlignment="Right" />
       </Grid>
 
       <Panel x:Name="ListArea" DragDrop.AllowDrop="True">
@@ -61,15 +76,15 @@
                  DoubleTapped="List_DoubleTapped">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="m:FileItem">
-              <Grid ColumnDefinitions="*,150,140,86" Background="Transparent" MinHeight="24">
-                <Grid ColumnDefinitions="Auto,*">
+              <Grid ColumnDefinitions="*,Auto,Auto,Auto" Background="Transparent" MinHeight="24" ToolTip.Tip="{Binding Name}">
+                <Grid ColumnDefinitions="Auto,*" MinWidth="80">
                   <Image Source="{Binding Icon}" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center"
                          RenderOptions.BitmapInterpolationMode="HighQuality" />
                   <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                 </Grid>
-                <TextBlock Grid.Column="1" Text="{Binding ModifiedText}" Classes="sub" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" Text="{Binding TypeName}" Classes="sub" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="3" Text="{Binding SizeText}" Classes="sub" VerticalAlignment="Center" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="{Binding ModifiedText}" Classes="sub colDate" VerticalAlignment="Center" Padding="8,0,0,0" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding TypeName}" Classes="sub colKind" VerticalAlignment="Center" Padding="8,0,0,0" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="3" Text="{Binding SizeText}" Classes="sub colSize" VerticalAlignment="Center" TextAlignment="Right" TextTrimming="CharacterEllipsis" />
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>

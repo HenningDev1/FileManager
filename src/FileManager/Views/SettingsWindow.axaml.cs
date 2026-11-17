@@ -39,6 +39,16 @@ public partial class SettingsWindow : Window
         RadiusSlider.Value = S.Radius;
         RadiusText.Text = $"{S.Radius:0}";
         HiddenSwitch.IsChecked = S.ShowHidden;
+        ScaleBox.SelectedIndex = Math.Max(0, Array.IndexOf(Scales, S.UiScale));
+    }
+
+    static readonly double[] Scales = [0, 0.8, 0.9, 1.0, 1.1, 1.25];
+
+    void Scale_Changed(object? s, SelectionChangedEventArgs e)
+    {
+        if (_loading || ScaleBox.SelectedIndex < 0) return;
+        S.UiScale = Scales[ScaleBox.SelectedIndex];
+        MainWindow.Current?.ApplyScale();
     }
 
     void Apply()
@@ -177,7 +187,8 @@ public partial class SettingsWindow : Window
     void Reset_Click(object? s, RoutedEventArgs e)
     {
         var d = new AppSettings();
-        S.Theme = d.Theme; S.Accent = d.Accent; S.Font = d.Font; S.FontSize = d.FontSize; S.Radius = d.Radius;
+        S.Theme = d.Theme; S.Accent = d.Accent; S.Font = d.Font; S.FontSize = d.FontSize; S.Radius = d.Radius; S.UiScale = d.UiScale;
+        MainWindow.Current?.ApplyScale();
         _loading = true; Load(); _loading = false;
         ThemeService.Apply(S);
     }

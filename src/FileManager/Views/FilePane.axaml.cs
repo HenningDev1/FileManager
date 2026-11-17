@@ -53,6 +53,10 @@ public partial class FilePane : UserControl
             lb.AddHandler(PointerMovedEvent, OnListMoved, RoutingStrategies.Tunnel, true);
             lb.AddHandler(PointerReleasedEvent, (_, _) => { _pressPoint = null; }, RoutingStrategies.Tunnel, true);
         }
+        SizeChanged += (_, e) => AdaptColumns(e.NewSize.Width);
+        // Keep the current folder (last breadcrumb) visible whenever the bar or its content resizes.
+        Crumbs.SizeChanged += (_, _) => CrumbScroll.Offset = new Vector(double.MaxValue, 0);
+        CrumbScroll.SizeChanged += (_, _) => CrumbScroll.Offset = new Vector(double.MaxValue, 0);
         ListArea.AddHandler(DragDrop.DragOverEvent, OnDragOver);
         ListArea.AddHandler(DragDrop.DropEvent, OnDrop);
     }
@@ -63,6 +67,30 @@ public partial class FilePane : UserControl
         ActiveList.SelectedItems?.Cast<FileItem>().ToList() ?? [];
 
     public bool IsActive { set => Card.Classes.Set("active", value); }
+
+    /// <summary>Shows back/forward/up buttons inside the pane (used in dual-pane mode).</summary>
+    public bool ShowNav { set => PaneNav.IsVisible = value; }
+
+    /// <summary>Drops less important columns as the pane narrows so file names stay readable.</summary>
+    void AdaptColumns(double width)
+    {
+        Card.Classes.Set("compact", width < 820);
+        Card.Classes.Set("noKind", width < 700);
+        Card.Classes.Set("noDate", width < 500);
+        Card.Classes.Set("noSize", width < 330);
+        CountText.IsVisible = width >= 460;
+    }
+
+    void UpdatePaneNav()
+    {
+        PaneBack.IsEnabled = CanGoBack;
+        PaneFwd.IsEnabled = CanGoForward;
+        PaneUp.IsEnabled = CurrentPath != ThisPC;
+    }
+
+    void PaneBack_Click(object? s, RoutedEventArgs e) { Activated?.Invoke(this); GoBack(); }
+    void PaneFwd_Click(object? s, RoutedEventArgs e) { Activated?.Invoke(this); GoForward(); }
+    void PaneUp_Click(object? s, RoutedEventArgs e) { Activated?.Invoke(this); GoUp(); }
 
     // ---------------- Navigation ----------------
 
@@ -86,6 +114,7 @@ public partial class FilePane : UserControl
         CurrentPath = path;
         _filter = "";
         BuildCrumbs();
+        UpdatePaneNav();
         SetupWatcher();
         PathChanged?.Invoke(this);
         await Reload(false, select);

@@ -7,7 +7,8 @@
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="40">
-  <Grid ColumnDefinitions="236,*">
+  <LayoutTransformControl x:Name="ScaleHost">
+  <Grid x:Name="RootGrid" ColumnDefinitions="236,*">
 
     <!-- ================= Sidebar ================= -->
     <Border Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
@@ -35,7 +36,7 @@
 
       <!-- Toolbar (also the window title bar) -->
       <Border Background="Transparent" PointerPressed="Drag_PointerPressed">
-        <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="12,12,148,6" VerticalAlignment="Center">
+        <Grid x:Name="ToolbarGrid" ColumnDefinitions="Auto,Auto,*,Auto" Margin="12,12,148,6" VerticalAlignment="Center">
           <StackPanel x:Name="NavGroup" Orientation="Horizontal" Spacing="2">
             <Button Classes="tb" x:Name="BackBtn" ToolTip.Tip="Back (Alt+←)" Click="Back_Click"><c:Ico Kind="back" /></Button>
             <Button Classes="tb" x:Name="FwdBtn" ToolTip.Tip="Forward (Alt+→)" Click="Forward_Click"><c:Ico Kind="forward" /></Button>
@@ -113,4 +114,5 @@
       </Grid>
     </Grid>
   </Grid>
+  </LayoutTransformControl>
 </Window>
